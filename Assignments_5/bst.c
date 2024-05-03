@@ -14,44 +14,44 @@
 
 typedef int Status;
 
-typedef struct Node 
+typedef struct Node
 {
     int data;
     struct Node *left;
     struct Node *right;
 } Node, *Tree;
 
-Status InitTree(Tree T, int data) 
+Status InitTree(Tree T, int data)
 {
     T->data = data;
     T->left = NULL;
     T->right = NULL;
-  return OK;
+    return OK;
 }
 
-Status AddNode(Node *N, int data) 
+Status AddNode(Node *N, int data)
 {
-    if (N->data > data) 
+    if (N->data > data)
     {
-        if (N->left) 
+        if (N->left)
         {
             AddNode(N->left, data);
-        } 
-        else 
+        }
+        else
         {
             N->left = (Node *)malloc(sizeof(Node));
             N->left->data = data;
             N->left->left = N->left->right = NULL;
             return OK;
         }
-    } 
+    }
     else
     {
-        if (N->right) 
+        if (N->right)
         {
             AddNode(N->right, data);
         }
-        else 
+        else
         {
             N->right = (Node *)malloc(sizeof(Node));
             N->right->data = data;
@@ -62,13 +62,14 @@ Status AddNode(Node *N, int data)
     return ERROR;
 }
 
-Status Search(Node *N, Status *Visit(Node *, int), int height) {
-  if (N->left)
-    Search(N->left, Visit, height + 1);
-  if (N->right)
-    Search(N->right, Visit, height + 1);
-  if (!N->left && !N->right)
-    Visit(N, height);
+Status Search(Node *N, Status *Visit(Node *, int), int height)
+{
+    if (N->left)
+        Search(N->left, Visit, height + 1);
+    if (N->right)
+        Search(N->right, Visit, height + 1);
+    if (!N->left && !N->right)
+        Visit(N, height);
     return OK;
 }
 
@@ -89,9 +90,10 @@ int main()
     N--;
     scanf("%d", &data);
     InitTree(T, data);
-    while (N--) {
-    scanf("%d", &data);
-    AddNode(T, data);
+    while (N--)
+    {
+        scanf("%d", &data);
+        AddNode(T, data);
     }
     Search(T, NodePrint, 1);
     return 0;
