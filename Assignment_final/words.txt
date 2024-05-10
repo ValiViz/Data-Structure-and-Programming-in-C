@@ -1,4 +1,4 @@
-abort
+abort       0
 abs
 acos
 asctime
@@ -11,9 +11,9 @@ atof
 atoi
 atol
 auto
-break
+break       13
 bsearch
-calloc
+calloc      15
 case
 ceil
 char
@@ -24,17 +24,17 @@ continue
 cos
 cosh
 ctime
-default
+default     26
 difftime
 div
 do
 double
-else
+else        31
 enum
 exit
 exp
 extern
-fabs
+fabs        36
 fclose
 feof
 ferror
@@ -59,13 +59,13 @@ fseek
 fsetpos
 ftell
 fwrite
-getc
+getc        61
 getchar
 getenv
 gets
 gmtime
 goto
-if
+if          67
 int
 isalnum
 isalpha
@@ -78,7 +78,7 @@ ispunct
 isspace
 isupper
 isxdigit
-labs
+labs        80
 ldexp
 ldiv
 localtime
@@ -86,7 +86,7 @@ log
 log10
 long
 longjmp
-malloc
+malloc      88
 memchr
 memcmp
 memcpy
@@ -94,14 +94,14 @@ memmove
 memset
 mktime
 modf
-perror
+perror      96
 pow
 printf
 putc
 putchar
 puts
-qsort
-raise
+qsort       102
+raise       103
 rand
 realloc
 register
@@ -109,7 +109,7 @@ remove
 rename
 return
 rewind
-scanf
+scanf       111
 setbuf
 setjmp
 setvbuf
@@ -146,7 +146,7 @@ strtoul
 struct
 switch
 system
-tan
+tan         148
 tanh
 time
 tmpfile
@@ -154,12 +154,12 @@ tmpnam
 tolower
 toupper
 typedef
-ungetc
+ungetc      156
 union
 unsigned
-va_arg
+va_arg      159
 va_end
 va_start
 void
 volatile
-while
+while       164
