@@ -1,57 +1,38 @@
 #include <stdio.h>
 #include <string.h>
-#define MAXSIZE 1000
 
-char *replace(char *src, int len, char *desk)
-{
-    char tmp[MAXSIZE];
-    strcpy(tmp, src + len);
-    int len_new = strlen(desk);
-    strcpy(src, desk);
-    strcat(src, tmp);
-}
+char str[500];
 
-int riselen(char *p)
+char *work(char *p)
 {
-    int ans = 1;
-    while (*(p + 1) != '\0')
+    if (*p == '\n')
+        return p;
+    if (*(p + 1) == *p + 1)
     {
-        if (*(p + 1) == *p + 1)
+        if (*(p + 2) == *(p + 1) + 1 && *(p + 2) != '\n')
         {
-            ans++;
-            p++;
-        }
-        else
-        {
-            break;
+            printf("%c-", *p);
+            p = p + 2;
+            while (*(p + 1) == *p + 1)
+            {
+                p++;
+            }
+            printf("%c", *p);
+            return p;
         }
     }
-    return ans;
+    printf("%c", *p);
+    return p;
 }
 
 int main()
 {
-    char str[MAXSIZE];
     gets(str);
-    int len = strlen(str);
-    char src[10] = "";
     char *p = str;
-    for (int i = 0; i < len; i++)
+    int length = strlen(str);
+    for (; p + 2 < str + length; p++)
     {
-        int new = riselen(p);
-        if (new > 2)
-        {
-            src[0] = *p;
-            src[1] = '-';
-            src[2] = *p + new - 1;
-            printf("%s", src);
-            i += new - 1;
-            p += new - 1;
-        }
-        else
-        {
-            putchar(*p);
-        }
-        p++;
+        p = work(p);
     }
+    return 0;
 }
