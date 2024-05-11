@@ -14,3 +14,9 @@ int main()
     fclose(fp);
     return 0;
 }
+
+// 结构（体）类型的关键字：struct
+// 结构（体）类型：struct student / STUDENT
+// 结构类型名/结构体名：student
+// （结构）成员名：name
+// 结构（体）类型变量（名）：LiHua

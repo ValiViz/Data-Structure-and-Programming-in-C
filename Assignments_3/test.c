@@ -3,9 +3,12 @@
 
 int main()
 {
-    float a = 100000, b = 100000;
-    float c = -1;
-    float d = a * a + b * b - 2 * a * b * c;
-    printf("%.2llf", sqrt(d));
-
+    int (*ptr)[3][4];
+    int a[3][4];
+    for(int i = 0; i < 12; i++)
+    {
+        a[i/4][i%4] = 10 * (i / 4) + i % 4;
+    }
+    ptr = &a;
+    printf("%d", (*ptr)[2][3]);
 }
