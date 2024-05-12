@@ -188,7 +188,7 @@ Status ListInsert(DulLinkList *L, int i, const ElemType *E)
     if (i > L->length || i < 0)
         return ERROR;
     DulNode *now = L->head;
-    if(L->length == 0)
+    if (L->length == 0)
     {
         now->next = (DulNode *)malloc(sizeof(DulNode));
         now->next->next = now->next->prior = now->next;
@@ -220,7 +220,7 @@ Status ListDelete(DulLinkList *L, int i, ElemType *E)
     DulNode *now = L->head;
     for (int j = 0; j < i; j++)
     {
-           now = now->next;
+        now = now->next;
     }
     DulNode *tmp = now->next;
     now->next = tmp->next;
@@ -267,7 +267,7 @@ Status unionL(DulLinkList *desk, const DulLinkList *src, int (*func_compar)(cons
 
 Status OccupyAble(DulNode *N, int m)
 {
-    if(N->data.memory >= m)
+    if (N->data.memory >= m)
     {
         return TRUE;
     }
@@ -276,7 +276,7 @@ Status OccupyAble(DulNode *N, int m)
 
 Status NodePrint(DulNode *N, int m)
 {
-    if(N->data.memory > 0)
+    if (N->data.memory > 0)
         printf("%d %d\n", N->data.site, N->data.memory);
     return 0;
 }
@@ -296,8 +296,7 @@ Status ListSearch(DulNode **N, int m)
             break;
         }
         now = now->next;
-    }
-    while (now != *N);
+    } while (now != *N);
     while (now != *N)
     {
         if (now->data.memory < min && OccupyAble(now, m))
@@ -307,7 +306,7 @@ Status ListSearch(DulNode **N, int m)
         }
         now = now->next;
     }
-    if(goal !=NULL)
+    if (goal != NULL)
     {
         *N = goal;
         goal->data.memory -= m;
@@ -322,7 +321,7 @@ int main()
     DulLinkList List;
     InitList(&List);
     ElemType input;
-    while(N--)
+    while (N--)
     {
         scanf("%d %d", &input.site, &input.memory);
         ListInsert(&List, List.length, &input);
@@ -331,7 +330,7 @@ int main()
     int m;
     DulNode *now = List.head->next;
     scanf("%d", &m);
-    while(m != -1)
+    while (m != -1)
     {
         ListSearch(&now, m);
         scanf("%d", &m);
