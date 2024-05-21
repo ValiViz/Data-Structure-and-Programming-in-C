@@ -3,8 +3,8 @@
 #include <string.h>
 
 // 开大了疑似过不了编译
-#define MAXSIZE 512
-#define MAXNAMELENGTH 512
+#define MAXSIZE 200
+#define MAXNAMELENGTH 100
 #define MAXLENGTH 4096
 
 #define TRUE 1
@@ -110,6 +110,27 @@ Status is_keepwords(char *str)
     return search_between(a, b, str);
 }
 
+int number_16_length(char *str)
+{
+    char *p = str + 2;
+    while ((*p <= '9' && *p >= '0') || (*p >= 'a' && *p <= 'f') || (*p >= 'A' && *p <= 'F'))
+    {
+        p++;
+    }
+    return p - str;
+}
+
+int strcat_cur(int cur, char *desk, char *src)
+{
+    char *p = src, *q = desk + cur;
+    for (; *p != '\0'; p++, q++)
+    {
+        *q = *p;
+    }
+    *q = *p;
+    return q - desk;
+}
+
 Status scan_program(FILE *fp, program *code)
 {
     if (feof(fp))
@@ -122,10 +143,32 @@ Status scan_program(FILE *fp, program *code)
     // 循环：FUNC(){}
     while (!feof(fp))
     {
+        char c = '\f';
+        // 读入回车符
+        while ((c = fgetc(fp)) != EOF)
+        {
+            if (c == '\n' || c == '\r')
+            {
+                continue;
+            }
+            else if (c == '\f')
+            {
+                break;
+            }
+            else
+            {
+                fseek(fp, -1, SEEK_CUR);
+                break;
+            }
+        }
+        if (c == '\f')
+        {
+            break;
+        }
         int small_flag = 0, big_flag = 0;
         Status is_main = FALSE;
         Status big_complete = FALSE;
-        int get_main_size = 0;
+        int cur = 0;
         Status get_name = TRUE;
         init_function(&code->functions[code->functions_size]);
         Status func_flag = FALSE;
@@ -193,17 +236,16 @@ Status scan_program(FILE *fp, program *code)
                             big_flag--;
                             big_complete = TRUE;
                         }
-                        code->main_information_flow[get_main_size] = *p;
-                        get_main_size++;
+                        code->main_information_flow[cur] = *p;
+                        cur++;
                     }
-                    code->main_information_flow[get_main_size] = ' ';
-                    get_main_size++;
-                    code->main_information_flow[get_main_size] = '\0';
+                    code->main_information_flow[cur++] = ' ';
+                    code->main_information_flow[cur] = '\0';
                     // puts(code->main_information_flow);
                 }
                 else
                 {
-                    //填补函数关键信息流
+                    // 填补函数关键信息流
                     for (; *p != '\0';)
                     {
                         if (*p == '(')
@@ -214,22 +256,27 @@ Status scan_program(FILE *fp, program *code)
                             {
                                 if (is_keepwords(&sign_word[0]))
                                 {
-                                    strcat(code->functions[code->functions_size].key_information_flow, sign_word);
+                                    cur = strcat_cur(cur, code->functions[code->functions_size].key_information_flow, sign_word);
                                 }
                                 else
                                 {
-                                    strcat(code->functions[code->functions_size].key_information_flow, "FUNC");
+                                    code->functions[code->functions_size].key_information_flow[cur++] = 'F';
+                                    code->functions[code->functions_size].key_information_flow[cur++] = 'U';
+                                    code->functions[code->functions_size].key_information_flow[cur++] = 'N';
+                                    code->functions[code->functions_size].key_information_flow[cur++] = 'C';
+                                    code->functions[code->functions_size].key_information_flow[cur] = '\0';
                                 }
                                 func_flag = FALSE;
                             }
-                            strcat(code->functions[code->functions_size].key_information_flow, "(");
+                            code->functions[code->functions_size].key_information_flow[cur++] = '(';
+                            code->functions[code->functions_size].key_information_flow[cur] = '\0';
                             continue;
                         }
                         else if (func_flag)
                         {
                             if (is_keepwords(sign_word))
                             {
-                                strcat(code->functions[code->functions_size].key_information_flow, sign_word);
+                                cur = strcat_cur(cur, code->functions[code->functions_size].key_information_flow, sign_word);
                             }
                             func_flag = FALSE;
                         }
@@ -237,25 +284,26 @@ Status scan_program(FILE *fp, program *code)
                         {
                             small_flag--;
                             p++;
-                            strcat(code->functions[code->functions_size].key_information_flow, ")");
+                            code->functions[code->functions_size].key_information_flow[cur++] = ')';
+                            code->functions[code->functions_size].key_information_flow[cur] = '\0';
                         }
                         else if (*p == '{')
                         {
                             big_flag++;
                             p++;
-                            strcat(code->functions[code->functions_size].key_information_flow, "{");
+                            code->functions[code->functions_size].key_information_flow[cur++] = '{';
+                            code->functions[code->functions_size].key_information_flow[cur] = '\0';
                         }
                         else if (*p == '}')
                         {
                             big_flag--;
                             p++;
-                            strcat(code->functions[code->functions_size].key_information_flow, "}");
+                            code->functions[code->functions_size].key_information_flow[cur++] = '}';
+                            code->functions[code->functions_size].key_information_flow[cur] = '\0';
                             big_complete = TRUE;
                         }
                         else
                         {
-                            // if(*p == 'a' && *(p+1) == 'd')
-                            // puts("here");
                             int length = sign_word_length(p);
                             if (length)
                             {
@@ -268,10 +316,22 @@ Status scan_program(FILE *fp, program *code)
                                 sign_word[i] = '\0';
                                 func_flag = TRUE;
                             }
+                            else if (*p == '0' && (*(p + 1) == 'x' || *(p + 1) == 'X'))
+                            {
+                                int length = number_16_length(p);
+                                int i = 0;
+                                for (; i < length; i++)
+                                {
+                                    sign_word[i] = *p;
+                                    p++;
+                                }
+                                sign_word[i] = '\0';
+                                cur = strcat_cur(cur, code->functions[code->functions_size].key_information_flow, sign_word);
+                            }
                             else
                             {
-                                char str[2] = {*p, '\0'};
-                                strcat(code->functions[code->functions_size].key_information_flow, str);
+                                code->functions[code->functions_size].key_information_flow[cur++] = *p;
+                                code->functions[code->functions_size].key_information_flow[cur] = '\0';
                                 p++;
                             }
                         }
@@ -291,19 +351,6 @@ Status scan_program(FILE *fp, program *code)
             // puts("main");
             // puts(code->main_information_flow);
         }
-        // 读入回车符
-        char c = fgetc(fp);
-        // 读入下一循环的首字母
-        if ((c = fgetc(fp)) == EOF)
-            break;
-        if (c != '\f')
-        {
-            fseek(fp, -1, SEEK_CUR);
-        }
-        else
-        {
-            break;
-        }
     }
     return OK;
 }
@@ -314,6 +361,7 @@ Status generate_program_key_information_flow(program *P)
     Status func_flag = FALSE;
     Status get_name = TRUE;
     Status is_main = FALSE;
+    int cur = 0;
     for (char *p = P->main_information_flow; *p != '\0';)
     {
         while (*p == ' ')
@@ -329,12 +377,12 @@ Status generate_program_key_information_flow(program *P)
             {
                 if (is_keepwords(sign_word))
                 {
-                    strcat(P->key_information_flow, sign_word);
+                    cur = strcat_cur(cur, P->key_information_flow, sign_word);
                 }
                 else
                 {
-                    strcat(P->key_information_flow, "FUNC");
-                    for (int i = 0; i < P->functions_size; i++)
+                    int i = 0;
+                    for (; i < P->functions_size; i++)
                     {
                         if (strcmp(sign_word, P->functions[i].name) == 0)
                         {
@@ -347,17 +395,26 @@ Status generate_program_key_information_flow(program *P)
                             break;
                         }
                     }
+                    if (i < P->functions_size)
+                    {
+                        P->key_information_flow[cur++] = 'F';
+                        P->key_information_flow[cur++] = 'U';
+                        P->key_information_flow[cur++] = 'N';
+                        P->key_information_flow[cur++] = 'C';
+                        P->key_information_flow[cur] = '\0';
+                    }
                 }
                 func_flag = FALSE;
             }
-            strcat(P->key_information_flow, "(");
+            P->key_information_flow[cur++] = '(';
+            P->key_information_flow[cur] = '\0';
             continue;
         }
         else if (func_flag)
         {
             if (is_keepwords(sign_word))
             {
-                strcat(P->key_information_flow, sign_word);
+                cur = strcat_cur(cur, P->key_information_flow, sign_word);
             }
             func_flag = FALSE;
         }
@@ -368,17 +425,20 @@ Status generate_program_key_information_flow(program *P)
         if (*p == ')')
         {
             p++;
-            strcat(P->key_information_flow, ")");
+            P->key_information_flow[cur++] = ')';
+            P->key_information_flow[cur] = '\0';
         }
         else if (*p == '{')
         {
             p++;
-            strcat(P->key_information_flow, "{");
+            P->key_information_flow[cur++] = '{';
+            P->key_information_flow[cur] = '\0';
         }
         else if (*p == '}')
         {
             p++;
-            strcat(P->key_information_flow, "}");
+            P->key_information_flow[cur++] = '}';
+            P->key_information_flow[cur] = '\0';
         }
         else
         {
@@ -396,9 +456,24 @@ Status generate_program_key_information_flow(program *P)
             }
             else
             {
-                char str[2] = {*p, '\0'};
-                strcat(P->key_information_flow, str);
-                p++;
+                if (*p == '0' && (*(p + 1) == 'x' || *(p + 1) == 'X'))
+                {
+                    int length = number_16_length(p);
+                    int i = 0;
+                    for (; i < length; i++)
+                    {
+                        sign_word[i] = *p;
+                        p++;
+                    }
+                    sign_word[i] = '\0';
+                    cur = strcat_cur(cur, P->key_information_flow, sign_word);
+                }
+                else
+                {
+                    P->key_information_flow[cur++] = *p;
+                    P->key_information_flow[cur] = '\0';
+                    p++;
+                }
             }
         }
     }
@@ -447,6 +522,14 @@ double sim(program *P1, program *P2)
     len1 = strlen(str1) + 1;
     len2 = strlen(str2) + 1;
     (max2(len1, len2) >= MaxDP) ? error2("DP memory error!") : len1;
+    if (str1[3] == str2[3] && str1[5] == str2[5] && str1[7] == str2[7] && str1[9] == str2[9])
+    {
+        if (strcmp(str1, str2) == 0)
+        {
+            return 1;
+        }
+    }
+
     for (i = 0; i <= len1; i++)
     {
         for (j = 0; j <= len2; j++)
@@ -471,7 +554,7 @@ int main()
     FILE *IN = fopen("codes.txt", "r");
 
     // debug用
-    // FILE *OUT = fopen("test.txt", "w");
+    FILE *OUT = fopen("test.txt", "w");
 
     // 读入待查重的代码，随之生成函数关键信息流或生成main函数信息流
     int codes_size = 0;
@@ -488,35 +571,55 @@ int main()
 
         // debug用
         // fprintf(OUT, "%d程序关键信息流\n", codes[i].number);
-        // fputs(codes[i].key_information_flow, OUT);
-        // fputc('\n', OUT);
+        fputs(codes[i].key_information_flow, OUT);
+        fputc('\n', OUT);
         // fputs("------------------------------------------------------------------------------------------", OUT);
         // fputc('\n', OUT);
     }
 
     // 计算相似度并输出相似代码
+    int is_sim[MAXSIZE][MAXSIZE] = {0};
     for (int i = 0; i < codes_size; i++)
     {
         if (codes[i].is_sim)
             continue;
+        // codes[i].is_sim = TRUE;
         Status is_sim_code_existing = FALSE;
-        for (int j = i + 1; j < codes_size; j++)
+        program *sim_program[MAXSIZE] = {};
+        int sim_program_size = 0;
+        for (int j = 0; j < codes_size; j++)
         {
-            double tmp_sim = sim(&codes[i], &codes[j]);
+            if (j == i)
+            {
+                sim_program[sim_program_size] = &codes[j];
+                sim_program_size++;
+                continue;
+            }
+            if (is_sim[i][j] == 0)
+            {
+                is_sim[i][j] = (sim(&codes[i], &codes[j]) > MAXSIMRATE ? 1 : -1);
+                is_sim[j][i] = is_sim[i][j];
+            }
+
             // printf("%d %d %lf\n", codes[i].number, codes[j].number, tmp_sim);
-            if (tmp_sim > MAXSIMRATE)
+            if (is_sim[i][j] == 1)
             {
                 if (!is_sim_code_existing)
                 {
-                    printf("%d", codes[i].number);
+                    // printf("%d", codes[i].number);
                     is_sim_code_existing = TRUE;
                 }
-                printf(" %d", codes[j].number);
+                sim_program[sim_program_size] = &codes[j];
+                sim_program_size++;
                 codes[j].is_sim = TRUE;
             }
         }
         if (is_sim_code_existing)
         {
+            for (int i = 0; i < sim_program_size; i++)
+            {
+                printf("%d ", sim_program[i]->number);
+            }
             printf("\n");
         }
     }
