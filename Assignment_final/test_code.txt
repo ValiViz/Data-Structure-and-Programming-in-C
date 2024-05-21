@@ -1,0 +1,656 @@
+110014
+find(char s[])
+{
+	int i;
+	int t = -1;
+	for (i = 1; i <= tot; i++)
+		if (strcmp(s, name[i]) == 0)
+		{
+			t = i;
+			break;
+		}
+	return t;
+}
+add(int x, int y, int z)
+{
+	e[++k].to = y;
+	e[k].next = head[x];
+	e[k].id = z;
+	e[k].from = x;
+	head[x] = k;
+}
+spfa(int xx, int yy)
+{
+	int i;
+	for (i = 1; i <= tot; i++)
+		d[i] = 100000;
+	d[xx] = 0;
+	q[1] = xx;
+	v[xx] = 1;
+	int l = 1, r = 1;
+	while (l <= r)
+	{
+		int x = q[l++];
+		v[x] = 0;
+		i = head[x];
+		while (i)
+		{
+			if (d[e[i].to] > d[x] + 1)
+			{
+				d[e[i].to] = d[x] + 1;
+				from[e[i].to] = i;
+				if (!v[e[i].to])
+				{
+					v[e[i].to] = 1;
+					q[++r] = e[i].to;
+				}
+			}
+			i = e[i].next;
+		}
+	}
+	tot = 0;
+	while (yy != xx)
+	{
+		ans[++tot] = from[yy];
+		yy = e[from[yy]].from;
+	}
+	printf("", name[xx]);
+	int num = 0;
+	for (i = tot; i >= 1; i--)
+	{
+		if (i != tot && e[ans[i]].id != e[ans[i + 1]].id)
+		{
+			printf("", e[ans[i + 1]].id, num, name[e[ans[i]].from]);
+			num = 1;
+		}
+		else
+			num++;
+	}
+	printf("", e[ans[1]].id, num, name[e[ans[1]].to]);
+}
+main()
+{
+	FILE *fp = fopen("", "");
+	fscanf(fp, "", &n);
+	int i, j, x, y;
+	for (i = 1; i <= n; i++)
+	{
+		fscanf(fp, "", &x, &a[i]);
+		int pre = -1;
+		for (j = 1; j <= a[i]; j++)
+		{
+			fscanf(fp, "", &s, &y);
+			int t = find(s);
+			if (t == -1)
+			{
+				t = ++tot;
+				strcpy(name[tot], s);
+			}
+			if (pre != -1)
+			{
+				add(pre, t, x);
+				add(t, pre, x);
+			}
+			pre = t;
+		}
+	}
+	scanf("", s1, s2);
+	int t1 = find(s1);
+	int t2 = find(s2);
+	spfa(t1, t2);
+	return 0;
+}
+
+100046
+main(){
+	for(int i=0;i<512;i++){
+		for(int j=0;j<512;j++){
+			if(i==j)BGweights[i][j].wei=0;
+			else BGweights[i][j].wei=INFINITY;
+		}
+	}
+	initMap();
+	
+	scanf("",start,end);
+	for(int i=0;i<VNUM;i++){
+		if(strcmp(BGvertex[i].sname,start)==0)vs=i;
+	}
+	for(int i=0;i<VNUM;i++){
+		if(strcmp(BGvertex[i].sname,end)==0)ve=i;
+	}
+
+
+
+
+
+
+     Dijkstra(vs);
+     int k,m=0;
+
+
+
+
+
+
+
+     printpath(ve,vs,-1);
+     
+
+
+
+	    
+
+	return 0;
+}
+initMap()
+{
+        FILE *fp;
+        int i,j,snum,lno,lnum,  v1,v2;
+        struct station st;
+        
+        fp=fopen("","");
+        
+        fscanf(fp,"",&snum);
+        for(i=0; i<snum; i++) {
+                fscanf(fp,"",&lno,&lnum);
+                v1 = v2 = -1;
+                for(j=0; j<lnum; j++){ 
+                        fscanf(fp,"",st.sname,&st.ischange);
+	                    v2 = addvertex(st); 
+	                    if(v1 != -1){
+	                        BGweights[v1][v2].wei = BGweights[v2][v1].wei = 1;
+	                        BGweights[v1][v2].lno = BGweights[v2][v1].lno = lno;
+	                    }
+	                    v1 = v2;
+                }
+        }
+       fclose(fp);
+       return;
+}
+addvertex(struct station st)
+{
+	
+	for(int i=0;i<VNUM;i++){
+		if(strcmp(BGvertex[i].sname,st.sname)==0)return i;
+	}
+	strcpy(BGvertex[VNUM].sname,st.sname);
+	BGvertex[VNUM++].ischange=st.ischange;
+
+	return VNUM-1;
+}
+Dijkstra( int  v0)
+{
+    int i, j, v, minweight;
+    for(i=0; i<VNUM; i++) { Sweight[i] = BGweights[v0][i].wei; Spath[i] = v0; }  
+    Sweight [v0] = 0;  
+    wfound [v0] = 1;  
+     for(i=0; i< VNUM-1; i++) {  
+         minweight =   INFINITY;
+         for(j=0; j <  VNUM;  j++)   
+             if( !wfound[j] && ( Sweight[j] < minweight) ) {
+                 v = j; 
+                 minweight = Sweight[v];
+             }
+         wfound[v] = 1;	
+
+		 
+         for(j =0; j < VNUM; j++){
+		        if( !wfound[j]  &&  (minweight + BGweights[v][j].wei < Sweight[j] )) {
+                 Sweight[j] = minweight + BGweights[v][j].wei;
+                 Spath[j] = v;  
+                 
+                }
+		 }
+		  
+             
+
+     } 
+}
+printpath(int i,int vs,int afteri)
+{
+	if(i==vs){
+		printf("",BGvertex[Spath[i]].sname,BGweights[Spath[i]][i].lno );
+		return;
+	}
+	else if(i==ve){
+		printpath(Spath[i],vs,i);
+			printf("",BGweights[i][Spath[i]].lno,++sum,BGvertex[i].sname);
+			sum=0;
+	}
+	else if(BGweights[i][afteri].lno!=BGweights[Spath[i]][i].lno){
+	     printpath(Spath[i],vs,i);
+			printf("",BGweights[i][Spath[i]].lno,++sum,BGvertex[i].sname);
+			sum=0;
+
+	}
+	else {
+	printpath(Spath[i],vs,i);
+	
+	sum++;
+	}
+}
+
+100047
+add_vex(Vex p)
+{
+    if (!p.istransfer)
+    {
+        v[vnum++] = p;
+        return vnum - 1; 
+    }
+    else
+    {
+        for (int i = 0; i < vnum; i++)
+        {
+            if (!strcmp(p.station_name, v[i].station_name))
+                return i;
+        }
+        v[vnum++] = p;
+        return vnum - 1;
+    }
+}
+create_graph()
+{
+    FILE *src = fopen("", "");
+    int v1, v2; 
+    int line_cnt;
+    Vex tmp_vex;
+    fscanf(src,"",&line_cnt);
+    for (int i = 0; i < line_cnt; i++)
+    {
+        int lineID, staion_cnt;
+        fscanf(src,"",&lineID, &staion_cnt);
+        v1 = v2 = -1;
+        for (int j=0;j<staion_cnt;j++)
+        {
+            fscanf(src,"",tmp_vex.station_name,&tmp_vex.istransfer);
+            v2=add_vex(tmp_vex);
+            if (v1!=-1)
+            {
+                mat[v1][v2].weight=mat[v2][v1].weight=1;
+                mat[v1][v2].line=mat[v2][v1].line=lineID;
+            }
+            v1=v2;
+        }
+    }
+    fclose(src);
+}
+DFS(int i)
+{
+    printf("",v[i].station_name);
+    visited_dfs[i]=1;
+    for (j=0;j<vnum;j++)
+    {
+        if(mat[i][j].weight>0&&visited_dfs[j]==0)
+        DFS(j);
+    }
+}
+Dijkstra(int v0)
+{
+    int minweight, minv;
+    int wfound[1000] = {0};
+    for (int i=0;i<vnum;i++)
+    {
+        sweight[i]=mat[v0][i].weight;
+        spath[i]=v0;
+        wfound[i]=0;
+    }
+    sweight[v0]=0;
+    wfound[v0]=1;
+    for (int i=0;i<vnum-1;i++)
+    {
+        minweight=32767;
+        for (int j=0;j<vnum;j++)
+        {
+            if (!wfound[j]&&sweight[j]<minweight)
+            {
+                minv=j;
+                minweight=sweight[minv];
+            }
+        }
+        wfound[minv]=1;
+        for (int j=0;j<vnum;j++)
+        {
+            if (!wfound[j]&&(minweight+mat[minv][j].weight)<sweight[j])
+            {
+                sweight[j]=minweight+mat[minv][j].weight;
+                spath[j]=minv;
+            }
+        }
+    }
+}
+reverse()
+{
+    int temple[1000] = {0};
+    for (int i = 0; i < path_cnt; i++)
+    {
+        temple[path_cnt - 1 - i] = final_path[i];
+    }
+    for (int i = 0; i < path_cnt; i++)
+    {
+        final_path[i] = temple[i];
+    }
+}
+put_path()
+{
+    int now, last, way_now, len;
+    last = 0, now = 1;
+    way_now = mat[final_path[last]][final_path[now]].line;
+    len = 0;
+    printf("", v[final_path[0]].station_name);
+    for (; now < path_cnt; now++)
+    {
+        if (way_now != mat[final_path[last]][final_path[now]].line)
+        {
+            printf("", way_now, len, v[final_path[last]].station_name);
+            way_now = mat[final_path[last]][final_path[now]].line;
+            len = 0;
+        }
+        len++;
+        last = now;
+    }
+    printf("", way_now, len, v[final_path[last]].station_name);
+}
+main()
+{
+    for (int i = 0; i < 1000; i++)
+    {
+        for (int j = 0; j < 1000; j++)
+        {
+            mat[i][j].weight = 32767;
+            mat[i][j].line = 0;
+        }
+    }
+    FILE *src = fopen("", "");
+    int v1, v2; 
+    int line_cnt;
+    Vex tmp_vex;
+    fscanf(src,"",&line_cnt);
+    for (int i = 0; i < line_cnt; i++)
+    {
+        int lineID, staion_cnt;
+        fscanf(src,"",&lineID, &staion_cnt);
+        v1 = v2 = -1;
+        for (int j=0;j<staion_cnt;j++)
+        {
+            fscanf(src,"",tmp_vex.station_name,&tmp_vex.istransfer);
+            v2=add_vex(tmp_vex);
+            if (v1!=-1)
+            {
+                mat[v1][v2].weight=mat[v2][v1].weight=1;
+                mat[v1][v2].line=mat[v2][v1].line=lineID;
+            }
+            v1=v2;
+        }
+    }
+    fclose(src);
+    char begin[32], end[32];
+    scanf("", begin, end);
+    int index_b, index_e;
+    for (int i = 0; i < vnum; i++)
+    {
+        if (!strcmp(begin, v[i].station_name))
+        index_b = i;
+        if (!strcmp(end, v[i].station_name))
+        index_e = i;
+    }
+    Dijkstra(index_b);
+    int tmp = index_e;
+    while (tmp != index_b)
+    {
+        final_path[path_cnt++] = tmp;
+        tmp = spath[tmp];
+    }
+    final_path[path_cnt++] = tmp;
+    int temple[1000] = {0};
+    for (int i = 0; i < path_cnt; i++)
+    {
+        temple[path_cnt - 1 - i] = final_path[i];
+    }
+    for (int i = 0; i < path_cnt; i++)
+    {
+        final_path[i] = temple[i];
+    }
+   int now, last, way_now, len;
+    last = 0, now = 1;
+    way_now = mat[final_path[last]][final_path[now]].line;
+    len = 0;
+    printf("", v[final_path[0]].station_name);
+    for (; now < path_cnt; now++)
+    {
+        if (way_now != mat[final_path[last]][final_path[now]].line)
+        {
+            printf("", way_now, len, v[final_path[last]].station_name);
+            way_now = mat[final_path[last]][final_path[now]].line;
+            len = 0;
+        }
+        len++;
+        last = now;
+    }
+    printf("", way_now, len, v[final_path[last]].station_name);
+}
+
+100049
+find(char str[])
+{
+	int i;
+	for(i=1;i<=m;i++)
+		if(strcmp(name[i],str)==0) return i;
+	return -1;
+}
+main()
+{
+	char start[30],goal[30];
+	scanf("",start,goal);
+	in=fopen("","");
+	int i;
+	fscanf(in,"",&n);
+	for(i=0;i<100;i++)
+	{
+		int k;
+		for(k=0;k<100;k++) map[i][k]=999;
+	}
+	for(i=1;i<=n;i++)
+	{
+		int len,flag,f,k,ml=0,value[100],locat[100],r;
+		char str[30],table[100][30];
+		fscanf(in,"",&r,&len);
+		for(k=1;k<=len;k++)
+		{
+			fscanf(in,"",str,&flag);
+			if(k==1 || flag==1 || strcmp(str,start)==0 || strcmp(str,goal)==0)
+			{
+				ml++;
+				strcpy(table[ml],str);
+				value[ml]=k-1;
+			}
+		}
+		for(k=1;k<=ml;k++)
+		{
+			int t=find(table[k]),j=0;
+			if(t==-1)
+			{
+				m++;
+				t=m;
+				strcpy(name[t],table[k]);
+			}
+			locat[k]=t;
+			while(line[t][j]!=0 && j<5) j++;
+			line[t][j]=r;
+		}
+		for(k=1;k<=ml;k++)
+		{
+			int j;
+			for(j=1;j<=ml;j++)
+				if(map[locat[k]][locat[j]]>abs(value[k]-value[j])) map[locat[k]][locat[j]]=abs(value[k]-value[j]);
+		}
+	}
+	
+	int v0=find(goal);
+	for(i=1;i<=m;i++)
+	{
+		sweight[i]=map[v0][i];
+		spath[i]=v0;
+	}
+	wfound[v0]=1;sweight[v0]=0;
+	for(i=1;i<m;i++)
+	{
+		int min=9999,v=0,k;
+		for(k=1;k<=m;k++)
+		{
+			if(sweight[k]<min && wfound[k]==0)
+			{
+				min=sweight[k];
+				v=k;
+			}
+		}
+		wfound[v]=1;
+		for(k=1;k<=m;k++)
+		{
+			if(wfound[k]==0 && map[k][v]!=0 && sweight[k]>sweight[v]+map[v][k])
+			{
+				sweight[k]=sweight[v]+map[v][k];
+				spath[k]=v;
+			}
+		}
+	}
+	
+	int w=find(start);
+	
+	while(w!=v0){
+		int k=0,j=0,l;
+		for(k=0;k<5;k++)
+			for(j=0;j<5;j++)
+			if(line[w][k]==line[spath[w]][j]){
+				l=line[w][k];
+				k=5;
+				j=5;
+			}
+		if(w==23 && spath[w]==25 && l==4) l=16;
+		if(w==24 && spath[w]==26 && l==4) l=16;
+		printf("",name[w],l,map[w][spath[w]]);
+		w=spath[w];
+	}
+	printf("",goal);
+	return 0;
+}
+
+100051
+main()
+{
+	int i,sta,ed;
+	initMap();
+	char start[MAXLEN],end[MAXLEN];
+	scanf("",start,end);
+	for(i=0;i<Vnum;i++){
+		if(strcmp(start,BGvertex[i].sname)==0){
+			sta=i;
+		}
+		if(strcmp(end,BGvertex[i].sname)==0){
+			ed=i;
+		}
+	}
+	Dijkstra(sta,ed);
+	printPath(sta,ed);
+	return 0;
+}
+initMap()
+{
+	FILE *fp;
+	int i,j,snum,lno,lnum,v1,v2;
+	struct station st;
+	fp=fopen("","");
+	fscanf(fp,"",&snum);
+	for(i=0;i<snum;i++){
+		fscanf(fp,"",&lno,&lnum);
+        v1=v2=-1;
+        for(j=0;j<lnum;j++){
+            fscanf(fp,"",st.sname,&st.ischange);
+	        v2 = addVertex(st); 
+	        if(v1 != -1){
+	            BGweights[v1][v2].wei = BGweights[v2][v1].wei =1;
+	            BGweights[v1][v2].lno = BGweights[v2][v1].lno =lno;
+	        }
+	        v1 = v2;
+        }
+	}
+	for(i=0;i<Vnum;i++){
+		for(j=0;j<Vnum;j++){
+			if(BGweights[i][j].wei==0){
+				BGweights[i][j].wei=INFINITY;
+			}
+			if(BGweights[i][j].lno==0){
+				BGweights[i][j].lno=-1;
+			}
+		}
+	}
+	fclose(fp);
+	return;
+}
+addVertex(struct station st)
+{
+	int i;
+	if(st.ischange==1){
+		for(i=0;i<Vnum;i++){
+			if(strcmp(st.sname,BGvertex[i].sname)==0){
+				return i;
+			}
+		}
+	}
+	BGvertex[Vnum++]=st;
+	return Vnum-1;
+}
+Dijkstra(int v0,int v1)
+{
+    int i, j, v, minweight,Sweight[MAXNUM]={0},wfound[MAXNUM] = {0}; 
+    for(i=0; i<Vnum; i++) { 
+	    Sweight[i] = BGweights[v0][i].wei; 
+		Spath[i] = v0; 
+	}  
+    Sweight[v0]= 0;  
+    wfound[v0]= 1;  
+    for(i=0; i<Vnum-1; i++) {  
+        minweight = INFINITY;
+        for(j=0;j<Vnum;j++)   
+            if(wfound[j]==0 && (Sweight[j]<minweight)) {
+                v = j; 
+                minweight = Sweight[v];
+            }
+        wfound[v] = 1;	
+        for(j=0;j<Vnum;j++) 
+            if(wfound[j]==0 && (minweight + BGweights[v][j].wei < Sweight[j] )) {
+                Sweight[j] = minweight + BGweights[v][j].wei;
+                Spath[j] = v;  
+           }
+     }
+     if(wfound[v1]==1){
+     	return;
+	 }
+}
+printPath(int v0,int v1)
+{
+	char path[80]={0},buf[80]={0};
+	int board[80],cnt=-1,i,j,hold;
+	board[++cnt]=v1;
+	v1=Spath[v1];
+	while(v1!=v0){
+		board[++cnt]=v1;
+		v1=Spath[v1];
+	}
+	board[++cnt]=v0;
+	sprintf(buf,"",BGvertex[board[cnt]].sname,BGweights[board[cnt]][board[cnt-1]].lno);
+	strcpy(path,buf);
+	hold=BGweights[board[cnt]][board[cnt-1]].lno;
+	for(i=cnt-1,j=1;i>0;i--,j++){
+		if(BGweights[board[i]][board[i-1]].lno!=hold){
+			sprintf(buf,"",j,BGvertex[board[i]].sname,BGweights[board[i]][board[i-1]].lno);
+		    strcat(path,buf);
+		    j=0;
+		    hold=BGweights[board[i]][board[i-1]].lno;
+		}
+	}
+	sprintf(buf,"",j,BGvertex[board[i]].sname);
+	strcat(path,buf);
+	printf("",path);
+}
+
