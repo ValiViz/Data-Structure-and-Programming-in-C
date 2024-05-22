@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 // 开大了疑似过不了编译
 #define MAXSIZE 200
@@ -18,6 +19,22 @@ char keepwords[165][10] = {"abort", "abs", "acos", "asctime", "asin", "assert", 
 
 // 基于首字母打表的快速搜索
 int search_from[26] = {0, 13, 15, 26, 31, 36, 61, 67, 67, 80, 80, 80, 88, 96, 96, 96, 102, 103, 111, 148, 156, 159, 164, 165, 165, 165};
+
+Status time_print()
+{
+    int time = clock();
+    printf("time:%d\n", time);
+}
+
+int qstrcmp(char *p, char *q)
+{
+    while (*q != '\0' && *p == *q)
+    {
+        p++;
+        q++;
+    }
+    return p - q;
+}
 
 typedef struct function
 {
@@ -522,13 +539,13 @@ double sim(program *P1, program *P2)
     len1 = strlen(str1) + 1;
     len2 = strlen(str2) + 1;
     (max2(len1, len2) >= MaxDP) ? error2("DP memory error!") : len1;
-    if (str1[3] == str2[3] && str1[5] == str2[5] && str1[7] == str2[7] && str1[9] == str2[9])
+    // if (str1[3] == str2[3] && str1[5] == str2[5] && str1[7] == str2[7] && str1[9] == str2[9])
+    // {
+    if (strcmp(str1, str2) == 0)
     {
-        if (strcmp(str1, str2) == 0)
-        {
-            return 1;
-        }
+        return 1;
     }
+    // }
 
     for (i = 0; i <= len1; i++)
     {
@@ -562,7 +579,7 @@ int main()
     {
         codes_size++;
     }
-
+    time_print();
     // 生成程序关键信息流
     for (int i = 0; i < codes_size; i++)
     {
@@ -571,12 +588,12 @@ int main()
 
         // debug用
         // fprintf(OUT, "%d程序关键信息流\n", codes[i].number);
-        fputs(codes[i].key_information_flow, OUT);
-        fputc('\n', OUT);
+        // fputs(codes[i].key_information_flow, OUT);
+        // fputc('\n', OUT);
         // fputs("------------------------------------------------------------------------------------------", OUT);
         // fputc('\n', OUT);
     }
-
+    time_print();
     // 计算相似度并输出相似代码
     int is_sim[MAXSIZE][MAXSIZE] = {0};
     for (int i = 0; i < codes_size; i++)
@@ -623,5 +640,6 @@ int main()
             printf("\n");
         }
     }
+    time_print();
     return 0;
 }
