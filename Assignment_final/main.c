@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+// #include <time.h>
 
 // 开大了疑似过不了编译
 #define MAXSIZE 200
@@ -20,20 +20,17 @@ char keepwords[165][10] = {"abort", "abs", "acos", "asctime", "asin", "assert", 
 // 基于首字母打表的快速搜索
 int search_from[26] = {0, 13, 15, 26, 31, 36, 61, 67, 67, 80, 80, 80, 88, 96, 96, 96, 102, 103, 111, 148, 156, 159, 164, 165, 165, 165};
 
-Status time_print()
-{
-    int time = clock();
-    printf("time:%d\n", time);
-}
+// Status time_print()
+// {
+//     int time = clock();
+//     printf("time:%d\n", time);
+// }
 
 int qstrcmp(char *p, char *q)
 {
-    while (*q != '\0' && *p == *q)
-    {
-        p++;
-        q++;
-    }
-    return p - q;
+    while (*q != '\0' && *p++ == *q++)
+        ;
+    return *--p - *--q;
 }
 
 typedef struct function
@@ -106,10 +103,10 @@ Status search_between(int a, int b, char *str)
 {
     if (a + 1 == b || a == b)
     {
-        return strcmp(str, keepwords[a]) == 0;
+        return qstrcmp(str, keepwords[a]) == 0;
     }
     int p = (a + b) / 2;
-    int ans = strcmp(str, keepwords[p]);
+    int ans = qstrcmp(str, keepwords[p]);
     if (ans == 0)
         return TRUE;
     if (ans > 0)
@@ -212,7 +209,7 @@ Status scan_program(FILE *fp, program *code)
                         name[p - str] = *p;
                     }
                     name[p - str] = '\0';
-                    if (strcmp(name, "main") == 0)
+                    if (qstrcmp(name, "main") == 0)
                     {
                         is_main = TRUE;
                     }
@@ -401,7 +398,7 @@ Status generate_program_key_information_flow(program *P)
                     int i = 0;
                     for (; i < P->functions_size; i++)
                     {
-                        if (strcmp(sign_word, P->functions[i].name) == 0)
+                        if (qstrcmp(sign_word, P->functions[i].name) == 0)
                         {
                             if (!P->functions[i].is_called)
                             {
@@ -541,7 +538,7 @@ double sim(program *P1, program *P2)
     (max2(len1, len2) >= MaxDP) ? error2("DP memory error!") : len1;
     // if (str1[3] == str2[3] && str1[5] == str2[5] && str1[7] == str2[7] && str1[9] == str2[9])
     // {
-    if (strcmp(str1, str2) == 0)
+    if (qstrcmp(str1, str2) == 0)
     {
         return 1;
     }
@@ -571,7 +568,7 @@ int main()
     FILE *IN = fopen("codes.txt", "r");
 
     // debug用
-    FILE *OUT = fopen("test.txt", "w");
+    // FILE *OUT = fopen("test.txt", "w");
 
     // 读入待查重的代码，随之生成函数关键信息流或生成main函数信息流
     int codes_size = 0;
@@ -579,7 +576,7 @@ int main()
     {
         codes_size++;
     }
-    time_print();
+    // time_print();
     // 生成程序关键信息流
     for (int i = 0; i < codes_size; i++)
     {
@@ -593,7 +590,7 @@ int main()
         // fputs("------------------------------------------------------------------------------------------", OUT);
         // fputc('\n', OUT);
     }
-    time_print();
+    // time_print();
     // 计算相似度并输出相似代码
     int is_sim[MAXSIZE][MAXSIZE] = {0};
     for (int i = 0; i < codes_size; i++)
@@ -640,6 +637,6 @@ int main()
             printf("\n");
         }
     }
-    time_print();
+    // time_print();
     return 0;
 }
