@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// #include <time.h>
+#include <time.h>
 
 // 开大了疑似过不了编译
 #define MAXSIZE 200
@@ -20,17 +20,20 @@ char keepwords[165][10] = {"abort", "abs", "acos", "asctime", "asin", "assert", 
 // 基于首字母打表的快速搜索
 int search_from[26] = {0, 13, 15, 26, 31, 36, 61, 67, 67, 80, 80, 80, 88, 96, 96, 96, 102, 103, 111, 148, 156, 159, 164, 165, 165, 165};
 
-// Status time_print()
-// {
-//     int time = clock();
-//     printf("time:%d\n", time);
-// }
+Status time_print()
+{
+    int time = clock();
+    printf("time:%d\n", time);
+}
 
 int qstrcmp(char *p, char *q)
 {
-    while (*q != '\0' && *p++ == *q++)
-        ;
-    return *--p - *--q;
+    while (*q != '\0' && *p == *q)
+    {
+        p++;
+        q++;
+    }
+    return *p - *q;
 }
 
 typedef struct function
@@ -526,7 +529,27 @@ int initDP()
         Dp[i] = (int *)malloc(MaxDP * sizeof(int));
     return 0;
 }
-double sim(program *P1, program *P2)
+
+Status dp_print(int dp[], int len1, int len2)
+{
+    printf("      ");
+    for (int j = 0; j < len2; j++)
+    {
+        printf("%6d ", j);
+    }
+    printf("\n");
+    for (int i = 0; i <= len1; i++)
+    {
+        printf("%6d", i);
+        for (int j = 0; j < len2; j++)
+        {
+            printf("%6d ", Dp[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int sim(program *P1, program *P2)
 {
     char *str1 = P1->key_information_flow, *str2 = P2->key_information_flow;
     int i, j;
@@ -535,7 +558,7 @@ double sim(program *P1, program *P2)
     (flag++) ? 1 : initDP();
     len1 = strlen(str1) + 1;
     len2 = strlen(str2) + 1;
-    (max2(len1, len2) >= MaxDP) ? error2("DP memory error!") : len1;
+    // (max2(len1, len2) >= MaxDP) ? error2("DP memory error!") : len1;
     // if (str1[3] == str2[3] && str1[5] == str2[5] && str1[7] == str2[7] && str1[9] == str2[9])
     // {
     if (qstrcmp(str1, str2) == 0)
@@ -543,23 +566,33 @@ double sim(program *P1, program *P2)
         return 1;
     }
     // }
-
+    double dp_limit = (1 - MAXSIMRATE) * max2(len1 - 1, len2 - 1);
     for (i = 0; i <= len1; i++)
     {
-        for (j = 0; j <= len2; j++)
+        Dp[i][0] = i;
+    }
+    for (j = 0; j <= len2; j++)
+    {
+        Dp[0][j] = j;
+    }
+    for (i = 1; i <= len1; i++)
+    {
+        for (j = 1; j <= len2; j++)
         {
-            if (i == 0)
-                Dp[i][j] = j;
-            else if (j == 0)
-                Dp[i][j] = i;
-            else if (str1[i - 1] == str2[j - 1])
+            if (str1[i - 1] == str2[j - 1])
+            {
                 Dp[i][j] = Dp[i - 1][j - 1];
+                // if (Dp[i][j] + len1 + len2 < dp_limit + i + j)
+                //     return 1;
+            }
             else
                 Dp[i][j] = 1 + min3(Dp[i][j - 1], Dp[i - 1][j], Dp[i - 1][j - 1]);
         }
+        // if (Dp[i][len2] + len1 < dp_limit + i)
+        //     return 1;
     }
-    double ans = 1 - (double)Dp[len1][len2] / max2(len1 - 1, len2 - 1);
-    return ans;
+    dp_print(Dp, len1, len2);
+    return -1;
 }
 
 program codes[MAXSIZE];
@@ -569,7 +602,7 @@ int main()
 
     // debug用
     // FILE *OUT = fopen("test.txt", "w");
-
+    // FILE *DEBUG = fopen("time.txt", "w");
     // 读入待查重的代码，随之生成函数关键信息流或生成main函数信息流
     int codes_size = 0;
     while (scan_program(IN, &codes[codes_size]))
@@ -601,6 +634,8 @@ int main()
         Status is_sim_code_existing = FALSE;
         program *sim_program[MAXSIZE] = {};
         int sim_program_size = 0;
+        // fprintf(DEBUG, "%d : ", i);
+        // time_print(DEBUG);
         for (int j = 0; j < codes_size; j++)
         {
             if (j == i)
@@ -611,7 +646,12 @@ int main()
             }
             if (is_sim[i][j] == 0)
             {
-                is_sim[i][j] = (sim(&codes[i], &codes[j]) > MAXSIMRATE ? 1 : -1);
+                // time_print(DEBUG);
+                is_sim[i][j] = sim(&codes[i], &codes[j]);
+                // fprintf(DEBUG, "calculate sim between %d and %d : \n", codes[i].number, codes[j].number);
+                // if (is_sim[i][j] == 1)
+                // fprintf(DEBUG, "SIM\n");
+                // time_print(DEBUG);
                 is_sim[j][i] = is_sim[i][j];
             }
 
@@ -637,6 +677,6 @@ int main()
             printf("\n");
         }
     }
-    // time_print();
+    time_print();
     return 0;
 }
