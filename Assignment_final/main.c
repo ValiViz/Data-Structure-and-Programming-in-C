@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+// #include <time.h>
 
 // 开大了疑似过不了编译
 #define MAXSIZE 200
@@ -20,11 +20,11 @@ char keepwords[165][10] = {"abort", "abs", "acos", "asctime", "asin", "assert", 
 // 基于首字母打表的快速搜索
 int search_from[26] = {0, 13, 15, 26, 31, 36, 61, 67, 67, 80, 80, 80, 88, 96, 96, 96, 102, 103, 111, 148, 156, 159, 164, 165, 165, 165};
 
-Status time_print()
-{
-    int time = clock();
-    printf("time:%d\n", time);
-}
+// Status time_print(FILE *DEBUG)
+// {
+//     int time = clock();
+//     fprintf(DEBUG, "time:%d\n", time);
+// }
 
 int qstrcmp(char *p, char *q)
 {
@@ -529,26 +529,6 @@ int initDP()
         Dp[i] = (int *)malloc(MaxDP * sizeof(int));
     return 0;
 }
-
-Status dp_print(int dp[], int len1, int len2)
-{
-    printf("      ");
-    for (int j = 0; j < len2; j++)
-    {
-        printf("%6d ", j);
-    }
-    printf("\n");
-    for (int i = 0; i <= len1; i++)
-    {
-        printf("%6d", i);
-        for (int j = 0; j < len2; j++)
-        {
-            printf("%6d ", Dp[i][j]);
-        }
-        printf("\n");
-    }
-}
-
 int sim(program *P1, program *P2)
 {
     char *str1 = P1->key_information_flow, *str2 = P2->key_information_flow;
@@ -569,29 +549,26 @@ int sim(program *P1, program *P2)
     double dp_limit = (1 - MAXSIMRATE) * max2(len1 - 1, len2 - 1);
     for (i = 0; i <= len1; i++)
     {
-        Dp[i][0] = i;
-    }
-    for (j = 0; j <= len2; j++)
-    {
-        Dp[0][j] = j;
-    }
-    for (i = 1; i <= len1; i++)
-    {
-        for (j = 1; j <= len2; j++)
+        for (j = 0; j <= len2; j++)
         {
-            if (str1[i - 1] == str2[j - 1])
+            if (i == 0)
+                Dp[i][j] = j;
+            else if (j == 0)
             {
-                Dp[i][j] = Dp[i - 1][j - 1];
-                // if (Dp[i][j] + len1 + len2 < dp_limit + i + j)
-                //     return 1;
+                Dp[i][j] = i;
+                if (Dp[i][0] + len1 + len2 < dp_limit + i)
+                    return 1;
             }
+            else if (str1[i - 1] == str2[j - 1])
+                Dp[i][j] = Dp[i - 1][j - 1];
             else
                 Dp[i][j] = 1 + min3(Dp[i][j - 1], Dp[i - 1][j], Dp[i - 1][j - 1]);
+            // if (Dp[i][j] + len1 + len2 < dp_limit + i + j)
+            //     return 1;
         }
-        // if (Dp[i][len2] + len1 < dp_limit + i)
-        //     return 1;
+        if (Dp[i][len2] + len1 < dp_limit + i)
+            return 1;
     }
-    dp_print(Dp, len1, len2);
     return -1;
 }
 
@@ -677,6 +654,6 @@ int main()
             printf("\n");
         }
     }
-    time_print();
+    // time_print();
     return 0;
 }
